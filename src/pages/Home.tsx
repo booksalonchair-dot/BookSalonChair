@@ -12,7 +12,6 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filter, setFilter] = useState('all');
 
   useEffect(() => {
     fetchSalons();
@@ -57,8 +56,7 @@ export default function Home() {
     .filter(salon => {
       const matchesSearch = salon.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           salon.services.some(s => s.name.toLowerCase().includes(searchQuery.toLowerCase()));
-      const matchesFilter = filter === 'all' || salon.services.some(s => s.category.toLowerCase() === filter.toLowerCase());
-      return matchesSearch && matchesFilter;
+      return matchesSearch;
     })
     .sort((a, b) => {
       if (!userLocation) return 0;
@@ -113,33 +111,17 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* Search & Filters */}
+      {/* Search Bar Only */}
       <section className="glass p-6 rounded-3xl sticky top-20 z-40">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary w-5 h-5" />
-            <input 
-              type="text" 
-              placeholder="Search salons or services..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-bg-elevated border border-white/10 rounded-2xl py-4 pl-12 pr-4 focus:outline-none focus:border-accent-primary transition-colors"
-            />
-          </div>
-          <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
-            {['All', 'Hair', 'Skin', 'Nail', 'Massage'].map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setFilter(cat.toLowerCase())}
-                className={cn(
-                  "px-6 py-4 rounded-2xl font-medium whitespace-nowrap transition-all",
-                  filter === cat.toLowerCase() ? "bg-accent-primary text-bg-primary" : "bg-bg-elevated text-text-secondary hover:bg-bg-elevated/80"
-                )}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary w-5 h-5" />
+          <input 
+            type="text" 
+            placeholder="Search salons or services..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-bg-elevated border border-white/10 rounded-2xl py-4 pl-12 pr-4 focus:outline-none focus:border-accent-primary transition-colors"
+          />
         </div>
       </section>
 

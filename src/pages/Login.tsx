@@ -81,6 +81,11 @@ export default function Login() {
           {loading ? 'Connecting...' : 'Continue with Google'}
         </button>
 
+        <div className="mt-6 p-4 bg-bg-elevated rounded-xl border border-white/5">
+          <p className="text-[10px] text-text-secondary uppercase tracking-widest mb-2">Current Domain (Add to Firebase)</p>
+          <code className="text-xs text-accent-secondary break-all">{window.location.hostname}</code>
+        </div>
+
         <p className="mt-4 text-xs text-text-secondary">
           If the popup doesn't appear, please check your browser's popup blocker.
         </p>
