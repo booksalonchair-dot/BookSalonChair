@@ -8,10 +8,18 @@ import { motion } from 'motion/react';
 import { cn } from '../lib/utils';
 
 export default function Onboarding() {
-  const { user } = useAuth();
+  const { user, profile, isAuthReady } = useAuth();
   const [role, setRole] = useState<'customer' | 'owner' | null>(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  React.useEffect(() => {
+    if (isAuthReady && profile) {
+      if (profile.role === 'admin') navigate('/admin');
+      else if (profile.role === 'owner') navigate('/owner/dashboard');
+      else navigate('/');
+    }
+  }, [profile, isAuthReady, navigate]);
 
   const handleComplete = async () => {
     if (!user || !role) return;

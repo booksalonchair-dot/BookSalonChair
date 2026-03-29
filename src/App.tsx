@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './lib/AuthContext';
+import { Toaster } from 'sonner';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import SalonDetails from './pages/SalonDetails';
@@ -26,6 +27,7 @@ export default function App() {
     <AuthProvider>
       <Router>
         <div className="min-h-screen bg-bg-primary text-text-primary">
+          <Toaster position="top-center" richColors />
           <Navbar />
           <main className="container mx-auto px-4 py-8">
             <Routes>

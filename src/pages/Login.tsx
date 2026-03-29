@@ -2,32 +2,56 @@ import React, { useState } from 'react';
 import { signInWithPopup } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { auth, googleProvider, db } from '../lib/firebase';
+import { useAuth } from '../lib/AuthContext';
 import { doc, getDoc } from 'firebase/firestore';
 import { Scissors } from 'lucide-react';
 import { motion } from 'motion/react';
+import { toast } from 'sonner';
 
 export default function Login() {
+  const { user, profile, isAuthReady } = useAuth();
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  React.useEffect(() => {
+    if (isAuthReady && user) {
+      if (profile?.role === 'admin') navigate('/admin');
+      else if (profile?.role === 'owner') navigate('/owner/dashboard');
+      else if (profile) navigate('/');
+      else navigate('/onboarding');
+    }
+  }, [user, profile, isAuthReady, navigate]);
+
   const handleGoogleLogin = async () => {
+    console.log('Starting Google Login...');
     setLoading(true);
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
+      console.log('Login successful:', user.email);
+      toast.success('Signed in successfully!');
       
       // Check if user exists in Firestore
       const userDoc = await getDoc(doc(db, 'users', user.uid));
       if (userDoc.exists()) {
         const profile = userDoc.data();
+        console.log('User profile found:', profile.role);
         if (profile.role === 'admin') navigate('/admin');
         else if (profile.role === 'owner') navigate('/owner/dashboard');
         else navigate('/');
       } else {
+        console.log('New user, navigating to onboarding');
         navigate('/onboarding');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login error:', error);
+      if (error.code === 'auth/popup-blocked') {
+        toast.error('Sign-in popup was blocked. Please allow popups for this site.');
+      } else if (error.code === 'auth/unauthorized-domain') {
+        toast.error('This domain is not authorized for Google Sign-in. Please contact the administrator.');
+      } else {
+        toast.error('Failed to sign in. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -56,6 +80,10 @@ export default function Login() {
           <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-6 h-6" />
           {loading ? 'Connecting...' : 'Continue with Google'}
         </button>
+
+        <p className="mt-4 text-xs text-text-secondary">
+          If the popup doesn't appear, please check your browser's popup blocker.
+        </p>
         
         <p className="mt-8 text-xs text-text-secondary">
           By continuing, you agree to our Terms of Service and Privacy Policy.
