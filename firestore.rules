@@ -1,0 +1,59 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+         (request.auth.token.email == "booksalonchair@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function isSalonOwner(salonData) {
+      return isAuthenticated() && request.auth.uid == salonData.ownerId;
+    }
+
+    // Users
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId) || isAdmin();
+    }
+    
+    // Salons
+    match /salons/{salonId} {
+      // Approved and live salons are visible to everyone
+      allow read: if (resource.data.isApproved == true && resource.data.isLive == true) || isAdmin() || isSalonOwner(resource.data);
+      // Owners can create/update their own salon, admin can do anything
+      allow write: if isAuthenticated() && (request.auth.uid == request.resource.data.ownerId || isAdmin());
+    }
+    
+    // Bookings
+    match /bookings/{bookingId} {
+      allow read: if isAuthenticated() && (request.auth.uid == resource.data.userId || request.auth.uid == resource.data.ownerId || isAdmin());
+      allow write: if isAuthenticated() && (request.auth.uid == request.resource.data.userId || isAdmin() || (request.auth.uid == resource.data.ownerId && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'chatEnabled', 'rejectionReason'])));
+    }
+    
+    // Chats
+    match /chats/{chatId} {
+      allow read, write: if isAuthenticated() && (request.auth.uid in resource.data.participants || isAdmin());
+      
+      match /messages/{messageId} {
+        allow read, write: if isAuthenticated() && (request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants || isAdmin());
+      }
+    }
+
+    // Payments
+    match /payments/{paymentId} {
+      allow read: if isAuthenticated() && (request.auth.uid == resource.data.ownerId || isAdmin());
+      allow write: if isAdmin();
+    }
+  }
+}

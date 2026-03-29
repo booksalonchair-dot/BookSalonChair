@@ -1,0 +1,8 @@
+{
+  "name": "Salon Chair",
+  "description": "Modern salon booking marketplace where users can discover nearby salons, book appointments, and communicate with salon owners.",
+  "requestFramePermissions": [
+    "geolocation",
+    "camera"
+  ]
+}

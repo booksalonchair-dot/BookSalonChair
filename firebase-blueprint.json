@@ -1,0 +1,76 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Stores user information and roles.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "name": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "role": { "type": "string", "enum": ["customer", "owner", "admin"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "fcmToken": { "type": "string" },
+        "notificationsEnabled": { "type": "boolean" }
+      },
+      "required": ["uid", "email", "name", "role", "createdAt"]
+    },
+    "Salon": {
+      "title": "Salon",
+      "description": "Stores salon listing details.",
+      "type": "object",
+      "properties": {
+        "ownerId": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "address": { "type": "string" },
+        "location": { "type": "object" },
+        "frontPhoto": { "type": "string" },
+        "gallery": { "type": "array", "items": { "type": "string" } },
+        "services": { "type": "array" },
+        "rating": { "type": "number" },
+        "totalReviews": { "type": "number" },
+        "isApproved": { "type": "boolean" },
+        "isLive": { "type": "boolean" },
+        "liveExpiryDate": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["ownerId", "name", "address", "location", "frontPhoto", "createdAt"]
+    },
+    "Booking": {
+      "title": "Booking",
+      "description": "Stores appointment details.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "salonId": { "type": "string" },
+        "ownerId": { "type": "string" },
+        "services": { "type": "array" },
+        "totalPrice": { "type": "number" },
+        "date": { "type": "string" },
+        "timeSlot": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "accepted", "rejected", "completed", "cancelled"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "chatEnabled": { "type": "boolean" }
+      },
+      "required": ["userId", "salonId", "ownerId", "date", "timeSlot", "status", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profiles"
+    },
+    "/salons/{salonId}": {
+      "schema": "Salon",
+      "description": "Salon listings"
+    },
+    "/bookings/{bookingId}": {
+      "schema": "Booking",
+      "description": "Appointment bookings"
+    }
+  }
+}
